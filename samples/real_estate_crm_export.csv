@@ -1,0 +1,5 @@
+Enquiry Date,Customer Name,Contact Email,Contact No,Project,Enquiry Status,Assigned Agent,Possession Date,Notes
+13-05-2026,Rohit Verma,rohit.verma@example.com,9876501234,Varah Swamy,Site Visit Done,agent1@groweasy.ai,Dec 2027,"Very interested, follow up next week"
+14-05-2026,Sneha Kapoor,,9876501235,Meridian Tower,Not Interested,agent2@groweasy.ai,,Budget mismatch
+15-05-2026,,no-email-example@nowhere.com,,Eden Park,,agent1@groweasy.ai,Jun 2028,Only email captured from web form
+16-05-2026,Walk-in Visitor,,,,,,, 
