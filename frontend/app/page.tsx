@@ -1,13 +1,44 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Papa from "papaparse";
 import UploadZone from "@/components/UploadZone";
 import DataTable from "@/components/DataTable";
 import SummaryCards from "@/components/SummaryCards";
 import ThemeToggle from "@/components/ThemeToggle";
 import ImportProgress from "@/components/ImportProgress";
-import { importCsv, previewCsv } from "@/lib/api";
-import { AppStage, ImportResponse, PreviewResponse } from "@/types";
+import { importCsv } from "@/lib/api";
+import { AppStage, CsvRow, ImportResponse, PreviewResponse } from "@/types";
+
+/**
+ * Parses a CSV file entirely in the browser for the preview step. No network
+ * call happens here — per the assignment spec, the backend should only be
+ * called once the user clicks "Confirm & Import".
+ */
+function parseCsvClientSide(file: File): Promise<PreviewResponse> {
+  return new Promise((resolve, reject) => {
+    Papa.parse<CsvRow>(file, {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: (h) => h.trim(),
+      complete: (results) => {
+        if (!results.meta.fields || results.meta.fields.length === 0) {
+          reject(new Error("Could not detect any columns in this CSV."));
+          return;
+        }
+        const rows = results.data.filter((row) =>
+          Object.values(row).some((v) => (v ?? "").toString().trim() !== "")
+        );
+        if (rows.length === 0) {
+          reject(new Error("CSV contains no data rows."));
+          return;
+        }
+        resolve({ headers: results.meta.fields, rows, totalRows: rows.length });
+      },
+      error: (err) => reject(err),
+    });
+  });
+}
 
 const CRM_COLUMNS = [
   "created_at",
@@ -40,7 +71,7 @@ export default function HomePage() {
     setFile(selected);
     setIsLoadingPreview(true);
     try {
-      const data = await previewCsv(selected);
+      const data = await parseCsvClientSide(selected);
       setPreview(data);
       setStage("preview");
     } catch (e) {

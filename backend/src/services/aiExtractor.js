@@ -57,6 +57,12 @@ function sanitizeRecord(raw, fallbackRow) {
   if (record.data_source && !ALLOWED_DATA_SOURCE.includes(record.data_source)) {
     record.data_source = "";
   }
+  // Per the assignment spec, created_at must be usable via `new Date(created_at)`.
+  // If the AI returned something JS can't parse, blank it rather than pass
+  // through a value that would break the CRM's date handling.
+  if (record.created_at && Number.isNaN(Date.parse(record.created_at))) {
+    record.created_at = "";
+  }
 
   const hasEmail = !!record.email;
   const hasMobile = !!record.mobile_without_country_code;
